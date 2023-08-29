@@ -1,0 +1,41 @@
+token = open ("token").read()
+
+
+
+import requests
+import json
+import os
+
+
+class YaUploader:
+    def __init__(self, _token: str):
+        self.token = _token
+
+    def upload(self, file_path):
+        """Метод загружает файл file_path на Яндекс.Диск"""
+        upload_url = "https://cloud-api.yandex.net:443"
+        file_name = file_path #.split('\\', )[-1]
+        #path = os.path.join(os.getcwd(), 'Recipes.txt')
+        headers = {'Content-Type': 'application/json', 'Authorization': 'OAuth {}'.format(self.token)}
+        params = {"path": f"Загрузки/{file_name}", "overwrite": "true"}
+        _response = requests.get(upload_url, headers=headers, params=params).json()
+        href = _response.get("href", "")
+        responce = requests.put(href, data=open(file_path, 'rb'))
+        responce.raise_for_status()
+        if responce.status_code == 201:
+            return 'Успешно'
+        else:
+            return f"Ошибка загрузки! Код ошибки: {responce.status_code}"
+
+
+if __name__ == '__main__':
+    # Задаем имя файла
+    f_name = 'DSC_0971.JPG'
+    path_to_file = os.path.join(os.getcwd(), f_name)
+    #Указываем токен
+    token = ''
+    uploader = YaUploader(token)
+    # Загружаем файл на диск
+    print(f"Загружаем файл {path_to_file} на Яндекс.Диск")
+    result = uploader.upload(path_to_file)
+    print(result)
